@@ -58,6 +58,9 @@ public class EcosystemManager {
 		microservice.setVmArguments(vmArguments);
 		microservice.setBuildTool(BuildTools.getByCode(buildTool));
 		microservice.setGitLocation(gitLocation);
+		if (microservice.getBuildTool().equals(BuildTools.MAVEN)) 
+			fileManager.readPom(microservice);
+		//TODO gradle properties parsing
 		fileManager.createScript(microservice);		
 		log.info("Saving microservice: [{}]", microservice.toString());
 		ecosystem.getMicroservices().add(microservice);
@@ -78,13 +81,9 @@ public class EcosystemManager {
 		microservice.setBuildTool(BuildTools.getByCode(buildTool));
 		microservice.setGitLocation(gitLocation);
 		fileManager.createScript(microservice);
-		if (microservice.getBuildTool().equals(BuildTools.MAVEN)) 
-			fileManager.readPom(microservice);
-		else {
-		  	microservice.setGroupId(groupId);
-		  	microservice.setArtifactId(artifactId);
-		  	microservice.setArtifactVersion(version);
-		}
+		microservice.setGroupId(groupId);
+	  	microservice.setArtifactId(artifactId);
+	  	microservice.setArtifactVersion(version);		
 
 		log.info("Saving microservice: [{}]", microservice.toString());
 		ecosystem.getMicroservices().add(microservice);
