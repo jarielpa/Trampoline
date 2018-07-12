@@ -58,7 +58,33 @@ public class EcosystemManager {
 		microservice.setVmArguments(vmArguments);
 		microservice.setBuildTool(BuildTools.getByCode(buildTool));
 		microservice.setGitLocation(gitLocation);
+		fileManager.createScript(microservice);		
+		log.info("Saving microservice: [{}]", microservice.toString());
+		ecosystem.getMicroservices().add(microservice);
+		fileManager.saveEcosystem(ecosystem);
+	}
+	
+	public void setNewMicroservice(String name, String pomLocation, String defaultPort, String actuatorPrefix, String vmArguments, String buildTool, String gitLocation, String groupId, String artifactId, String version) throws CreatingSettingsFolderException, ReadingEcosystemException, CreatingMicroserviceScriptException, SavingEcosystemException {
+		Ecosystem ecosystem = fileManager.getEcosystem();
+
+		log.info("Creating new microservice name: [{}]", name);
+		Microservice microservice = new Microservice();
+		microservice.setId(UUID.randomUUID().toString());
+		microservice.setName(name);
+		microservice.setPomLocation(pomLocation);
+		microservice.setDefaultPort(defaultPort);
+		microservice.setActuatorPrefix(actuatorPrefix);
+		microservice.setVmArguments(vmArguments);
+		microservice.setBuildTool(BuildTools.getByCode(buildTool));
+		microservice.setGitLocation(gitLocation);
 		fileManager.createScript(microservice);
+		if (microservice.getBuildTool().equals(BuildTools.MAVEN)) 
+			fileManager.readPom(microservice);
+		else {
+		  	microservice.setGroupId(groupId);
+		  	microservice.setArtifactId(artifactId);
+		  	microservice.setArtifactVersion(version);
+		}
 
 		log.info("Saving microservice: [{}]", microservice.toString());
 		ecosystem.getMicroservices().add(microservice);

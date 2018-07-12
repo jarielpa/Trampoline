@@ -64,7 +64,9 @@ public class GitManager {
         try {
             git.checkout().setCreateBranch(true).setName(branchName).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).setStartPoint("origin/" + branchName).call();
         }catch (RefAlreadyExistsException e){
+        	log.info("Branch already exists for microservice id: [{}], branchName: [{}]", microserviceId, branchName);
             git.checkout().setCreateBranch(false).setName(branchName).call();
+           
         }
 
         if(ecosystem.getGitCredentials()!=null){

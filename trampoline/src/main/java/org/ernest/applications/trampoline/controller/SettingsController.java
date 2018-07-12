@@ -1,7 +1,16 @@
 package org.ernest.applications.trampoline.controller;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.ernest.applications.trampoline.entities.*;
+import org.ernest.applications.trampoline.entities.Ecosystem;
+import org.ernest.applications.trampoline.entities.Instance;
+import org.ernest.applications.trampoline.entities.Microservice;
+import org.ernest.applications.trampoline.entities.MicroserviceGitInfo;
+import org.ernest.applications.trampoline.entities.MicroserviceGroupInfo;
+import org.ernest.applications.trampoline.entities.MicroservicesGroup;
 import org.ernest.applications.trampoline.exceptions.CreatingMicroserviceScriptException;
 import org.ernest.applications.trampoline.exceptions.CreatingSettingsFolderException;
 import org.ernest.applications.trampoline.exceptions.ReadingEcosystemException;
@@ -9,6 +18,7 @@ import org.ernest.applications.trampoline.exceptions.SavingEcosystemException;
 import org.ernest.applications.trampoline.services.EcosystemManager;
 import org.ernest.applications.trampoline.services.FileManager;
 import org.ernest.applications.trampoline.services.GitManager;
+import org.ernest.applications.trampoline.services.MavenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,10 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/settings")
@@ -35,6 +41,9 @@ public class SettingsController {
 
 	@Autowired
 	GitManager gitManager;
+	
+	@Autowired
+	MavenManager mavenManager;
 
 	@RequestMapping("")
     public String getSettingsView(Model model) {
@@ -65,6 +74,17 @@ public class SettingsController {
 								   @RequestParam(value="defaultPort") String defaultPort, @RequestParam(value="actuatorPrefix") String actuatorPrefix,
 								   @RequestParam(value="vmArguments") String vmArguments, @RequestParam(value="buildTool") String buildTool, @RequestParam(value="gitLocation") String gitLocation) throws CreatingSettingsFolderException, ReadingEcosystemException, CreatingMicroserviceScriptException, SavingEcosystemException {
 		ecosystemManager.setNewMicroservice(name, pomLocation, defaultPort, actuatorPrefix, vmArguments, buildTool, gitLocation);
+	}
+	
+	@RequestMapping(value= "/setnewmicroservice/maven", method = RequestMethod.POST)
+	@ResponseBody
+	public void setNewMicroserviceFromMaven(@RequestParam(value="gitLocation") String gitLocation, @RequestParam(value="destinationFolder") String destinationFolder,
+			                       @RequestParam(value="name") String name, 
+								   @RequestParam(value="defaultPort") String defaultPort, @RequestParam(value="actuatorPrefix") String actuatorPrefix,
+								   @RequestParam(value="vmArguments") String vmArguments, @RequestParam(value="groupId") String groupId, @RequestParam(value="artifactId") String artifactId,@RequestParam(value="version") String version) throws CreatingSettingsFolderException, ReadingEcosystemException, CreatingMicroserviceScriptException, SavingEcosystemException {
+		
+		mavenManager.copyMavenDependency(groupId, artifactId, version, destinationFolder);
+		ecosystemManager.setNewMicroservice(name, new StringBuilder(destinationFolder).append("/").append(artifactId).append("-").append(version).append(".jar").toString(), defaultPort, actuatorPrefix, vmArguments, "jar", gitLocation, groupId, artifactId, version);
 	}
 
 	@RequestMapping(value= "/setnewmicroservice/git", method = RequestMethod.POST)

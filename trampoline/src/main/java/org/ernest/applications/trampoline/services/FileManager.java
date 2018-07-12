@@ -1,12 +1,17 @@
 package org.ernest.applications.trampoline.services;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.ernest.applications.trampoline.entities.BuildTools;
 import org.ernest.applications.trampoline.entities.Ecosystem;
 import org.ernest.applications.trampoline.entities.Microservice;
+import org.ernest.applications.trampoline.exceptions.CreatingMavenMicroserviceException;
 import org.ernest.applications.trampoline.exceptions.CreatingMicroserviceScriptException;
 import org.ernest.applications.trampoline.exceptions.CreatingSettingsFolderException;
 import org.ernest.applications.trampoline.exceptions.ReadingEcosystemException;
@@ -59,15 +64,17 @@ public class FileManager {
 	}
 
     private void updateMicroservicesInformationStored(Ecosystem ecosystem) {
-		boolean ecosystemChanged = false;
-		ecosystemChanged = createBasicInformation(ecosystem, ecosystemChanged);
-		ecosystemChanged = createBuildTool(ecosystem, ecosystemChanged);
-		ecosystemChanged = createVersion(ecosystem, ecosystemChanged, currentVersion);
-		ecosystemChanged = createIp(ecosystem, ecosystemChanged);
-
-		if(ecosystemChanged){
-			saveEcosystem(ecosystem);
-		}
+        if (ecosystem.getMicroservices().stream().anyMatch(m -> m.getVersion() == null)) {
+			boolean ecosystemChanged = false;
+			ecosystemChanged = createBasicInformation(ecosystem, ecosystemChanged);
+			ecosystemChanged = createBuildTool(ecosystem, ecosystemChanged);
+			ecosystemChanged = createVersion(ecosystem, ecosystemChanged, currentVersion);
+			ecosystemChanged = createIp(ecosystem, ecosystemChanged);
+	
+			if(ecosystemChanged){
+				saveEcosystem(ecosystem);
+			}
+        }
     }
 
 	private boolean createIp(Ecosystem ecosystem, boolean ecosystemChanged) {
@@ -86,9 +93,10 @@ public class FileManager {
             });
 			ecosystemChanged = true;
         }
-		return ecosystemChanged;
-	}
 
+        return ecosystemChanged;
+    }
+    
 	private boolean createBuildTool(Ecosystem ecosystem, boolean ecosystemChanged) {
 		if(ecosystem.getMicroservices().stream().anyMatch(m -> m.getBuildTool() == null)){
             ecosystem.getMicroservices().stream().filter(m -> m.getBuildTool() == null).forEach(m -> m.setBuildTool(BuildTools.MAVEN));
@@ -131,6 +139,8 @@ public class FileManager {
 					commands = commands.replace("#mavenBinaryLocation", mavenBinaryLocation);
 					commands = commands.replace("#mavenHomeLocation", mavenHomeLocation);
 					commands = commands.replace("#vmArguments", vmArguments);
+                } else if (microservice.getBuildTool().equals(BuildTools.JAR)) {
+                    commands = commands.replace("#vmArguments", vmArguments);
 				}else{
 					commands = commands.replace("#vmArguments", VMParser.toWindowsEnviromentVariables(vmArguments));
 				}
@@ -140,10 +150,14 @@ public class FileManager {
 				if(microservice.getBuildTool().equals(BuildTools.MAVEN)){
 					mavenBinaryLocation = (mavenBinaryLocation != null && mavenBinaryLocation.trim().length() > 0) ? mavenBinaryLocation : mavenHomeLocation + "/bin";
 					new ProcessBuilder("sh", getSettingsFolder() + "/" + microservice.getId() + ".sh", mavenHomeLocation, mavenBinaryLocation, port, vmArguments).start();
+                } else if (microservice.getBuildTool().equals(BuildTools.JAR)) {
+                    log.info("Starting jar with : {} serviceId: {} , port: {}, vmArgs: {}" , getSettingsFolder() , microservice.getId() + ".sh", port, VMParser.toUnixEnviromentVariables(vmArguments));
+                    new ProcessBuilder("sh", getSettingsFolder() + "/" + microservice.getId() + ".sh", port, vmArguments).start();
 				}else{
 					Runtime.getRuntime().exec("chmod 777 "+microservice.getPomLocation()+"//gradlew");
 					new ProcessBuilder("sh", getSettingsFolder() + "/" + microservice.getId() + ".sh", port, VMParser.toUnixEnviromentVariables(vmArguments)).start();
 				}
+                log.info("Build Tool: {} " ,microservice.getBuildTool());
 			}
 			
 		} catch (IOException e) {
@@ -160,6 +174,8 @@ public class FileManager {
 
 				if(microservice.getBuildTool().equals(BuildTools.MAVEN)) {
 					FileUtils.writeStringToFile(new File(getSettingsFolder() + "/" + microservice.getId() + ".txt"), ScriptContentsProvider.getMavenWindows(microservice.getPomLocation()));
+                } else if (microservice.getBuildTool().equals(BuildTools.JAR)) {
+                    FileUtils.writeStringToFile(new File(getSettingsFolder() + "/" + microservice.getId() + ".txt"), ScriptContentsProvider.getJar(microservice.getPomLocation()));
 				}else{
 					FileUtils.writeStringToFile(new File(getSettingsFolder() + "/" + microservice.getId() + ".txt"), ScriptContentsProvider.getGradleWindows(microservice.getPomLocation()));
 				}
@@ -168,6 +184,8 @@ public class FileManager {
 
 				if(microservice.getBuildTool().equals(BuildTools.MAVEN)) {
 					FileUtils.writeStringToFile(new File(getSettingsFolder() + "/" + microservice.getId() + ".sh"),ScriptContentsProvider.getMavenUnix(microservice.getPomLocation()));
+                }else if (microservice.getBuildTool().equals(BuildTools.JAR)) {
+                    FileUtils.writeStringToFile(new File(getSettingsFolder() + "/" + microservice.getId() + ".sh"), ScriptContentsProvider.getJar(microservice.getPomLocation()));
 				}else{
 					FileUtils.writeStringToFile(new File(getSettingsFolder() + "/" + microservice.getId() + ".sh"), ScriptContentsProvider.getGradleUnix(microservice.getPomLocation()));
 				}
@@ -200,6 +218,24 @@ public class FileManager {
 			throw new CreatingSettingsFolderException();
 		}
 	}
+
+	public void readPom(Microservice microservice) throws CreatingMavenMicroserviceException {
+		MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model;
+		try {
+			model = reader.read(new FileReader(microservice.getPomLocation() + "/pom.xml"));
+			microservice.setGroupId(model.getGroupId());
+		    microservice.setArtifactId(model.getArtifactId());
+		    microservice.setArtifactVersion(model.getVersion());
+		} catch (IOException | XmlPullParserException e) {			
+			e.printStackTrace();
+			throw new CreatingMavenMicroserviceException();
+		}
+      
+		
+	}
+
+	
 
 
 }

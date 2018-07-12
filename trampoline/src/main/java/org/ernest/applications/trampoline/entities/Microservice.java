@@ -11,6 +11,9 @@ public class Microservice {
 	private String vmArguments;
 	private BuildTools buildTool;
 	private Float version;
+	private String groupId;
+	private String artifactId;
+	private String artifactVersion;
 	
 	public String getId() {
 		return id;
@@ -85,6 +88,27 @@ public class Microservice {
 				", vmArguments='" + vmArguments + '\'' +
 				", buildTool=" + buildTool +
 				", version=" + version +
+				", groupId='" + groupId + '\'' +
+				", artifactId='" + artifactId + '\'' +
+				", artifactVersion='" + artifactVersion + '\'' +
 				'}';
+	}
+	public String getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+	public String getArtifactId() {
+		return artifactId;
+	}
+	public void setArtifactId(String artifactId) {
+		this.artifactId = artifactId;
+	}
+	public String getArtifactVersion() {
+		return artifactVersion;
+	}
+	public void setArtifactVersion(String artifactVersion) {
+		this.artifactVersion = artifactVersion;
 	}
 }

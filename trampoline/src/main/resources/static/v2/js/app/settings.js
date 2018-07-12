@@ -122,6 +122,43 @@ function setNewMicroservice(){
 	}
 }
 
+function setNewMicroserviceFromMaven(){
+	if($("#input-hidden-mavenhomelocation").val() == ''){
+		$("#form-mavenhomelocation").addClass("has-error");
+	}else{
+	    var fieldsToCheck = [];
+        fieldsToCheck.push("maven-newmicroservice-name");
+        fieldsToCheck.push("maven-newmicroservice-destination");
+        fieldsToCheck.push("maven-newmicroservice-groupId");
+        fieldsToCheck.push("maven-newmicroservice-artifactId");
+        fieldsToCheck.push("maven-newmicroservice-defaultport");
+        fieldsToCheck.push("maven-newmicroservice-version");
+
+        if(!cheackEmptyValuesForm(fieldsToCheck)){
+		    $('.front-loading').show();
+			$.ajax({
+			    url : "/settings/setnewmicroservice/maven",
+			    type: "POST",
+			    data : {gitLocation: $('#input-git-newmicroservice-gitLocation').val(),
+			            destinationFolder: $('#input-maven-newmicroservice-destination').val(),
+			    	    name: $("#input-maven-newmicroservice-name").val(), 			    				    	    
+			    	    defaultPort: $("#input-maven-newmicroservice-defaultport").val(),
+			    	    actuatorPrefix: $("#input-maven-newmicroservice-actuatorprefix").val(),
+			    	    vmArguments: $("#input-maven-newmicroservice-vmarguments").val(),
+			    	    groupId: $("#input-maven-newmicroservice-groupId").val(),
+			    	    artifactId: $("#input-maven-newmicroservice-artifactId").val(),
+			    	    version: $("#input-maven-newmicroservice-version").val()},			    	    			    	    
+			    success: function(data, textStatus, jqXHR) { location.reload(); },
+                 error: function (request, status, error) {
+                      $('.front-loading').hide();
+                       showNotification('danger', "Error occurred when trying to register a microservice. Check Logs for more info");
+
+                   }
+			});
+		}
+	}
+}
+
 function removeMicroservice(microserviceId){
     $('.front-loading').show();
 	$.ajax({
@@ -145,6 +182,9 @@ function showMicroserviceInformation(microserviceId){
 	    data : {id: microserviceId},
 	    success: function(data, textStatus, jqXHR) {
 	        $("#modal-microservice-name").text(data.name);
+	        $("#modal-microservice-groupId").text(data.groupId);
+	        $("#modal-microservice-artifactId").text(data.artifactId);
+	        $("#modal-microservice-version").text(data.artifactVersion);
 	        $("#modal-microservice-buildTool").text(data.buildTool);
 	        $("#input-update-pomLocation").val(data.pomLocation);
 	        $("#input-update-default-port").val(data.defaultPort);
@@ -358,15 +398,18 @@ $(document).ready(function(){
     $('[data-toggle="git-popover"]').popover();
     $("#tab-newmicroservice-git-repo").addClass("active");
     $('#content-file-system').hide();
+    $('#content-newmicroservice-maven-repo').hide();
 });
 
 function showNewMsForm(component){
      $('#content-file-system').hide();
      $('#content-newmicroservice-git-repo').hide();
+     $('#content-newmicroservice-maven-repo').hide();
      $('#content-'+component).show();
 
     $("#tab-newmicroservice-git-repo").removeClass("active");
     $("#tab-file-system").removeClass("active");
+    $("#tab-newmicroservice-maven-repo").removeClass("active");
     $("#tab-"+component).addClass("active");
 }
 
