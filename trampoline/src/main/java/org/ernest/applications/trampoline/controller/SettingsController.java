@@ -89,11 +89,11 @@ public class SettingsController {
 
 	@RequestMapping(value= "/setnewmicroservice/git", method = RequestMethod.POST)
 	@ResponseBody
-	public void setNewMicroserviceFromGit(@RequestParam(value="gitRepo") String gitRepo, @RequestParam(value="destinationFolder") String destinationFolder,
+	public void setNewMicroserviceFromGit(@RequestParam(value="gitRepo") String gitRepo, @RequestParam(value="gitReference") String gitReference, @RequestParam(value="destinationFolder") String destinationFolder,
 										  @RequestParam(value="name") String name, @RequestParam(value="pomLocation") String pomLocation,
 								   @RequestParam(value="defaultPort") String defaultPort, @RequestParam(value="actuatorPrefix") String actuatorPrefix,
 								   @RequestParam(value="vmArguments") String vmArguments, @RequestParam(value="buildTool") String buildTool, @RequestParam(value="gitLocation") String gitLocation) throws CreatingSettingsFolderException, ReadingEcosystemException, CreatingMicroserviceScriptException, SavingEcosystemException, GitAPIException {
-		gitManager.cloneRepository(gitRepo, destinationFolder);
+		gitManager.cloneRepository(gitRepo, gitReference,destinationFolder);
 		ecosystemManager.setNewMicroservice(name, pomLocation, defaultPort, actuatorPrefix, vmArguments, buildTool, gitLocation);
 	}
 

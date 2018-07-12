@@ -57,7 +57,7 @@ public class EcosystemManager {
 		microservice.setActuatorPrefix(actuatorPrefix);
 		microservice.setVmArguments(vmArguments);
 		microservice.setBuildTool(BuildTools.getByCode(buildTool));
-		microservice.setGitLocation(gitLocation);
+		microservice.setGitLocation(gitLocation);		
 		if (microservice.getBuildTool().equals(BuildTools.MAVEN)) 
 			fileManager.readPom(microservice);
 		//TODO gradle properties parsing
@@ -210,6 +210,8 @@ public class EcosystemManager {
 		microservice.setActuatorPrefix(actuatorPrefix);
 		microservice.setVmArguments(vmArguments);
 		microservice.setGitLocation(gitLocation);
+		
+		
 
 		fileManager.createScript(microservice);
 

@@ -88,11 +88,12 @@ public class GitManager {
         ecosystemManager.cleanGitCred();
     }
 
-    public void cloneRepository(String gitUrl, String destinationFolder) throws GitAPIException {
+    public void cloneRepository(String gitUrl, String gitReference, String destinationFolder) throws GitAPIException {
         log.info("Cloning repository gitUrl: [{}] destinationFolder: [{}]", gitUrl, destinationFolder);
 
         Ecosystem ecosystem =  ecosystemManager.getEcosystem();
         CloneCommand cloneCommand = Git.cloneRepository();
+        cloneCommand.setBranch(gitReference);
 
         if(ecosystem.getGitCredentials()!=null){
             cloneCommand.setCredentialsProvider(buildCredentialsProvider(ecosystem.getGitCredentials()));

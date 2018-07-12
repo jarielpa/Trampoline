@@ -5,7 +5,7 @@ public class Microservice {
 	private String id;
 	private String name;
 	private String pomLocation;
-	private String gitLocation;
+	private String gitLocation;	
 	private String defaultPort;
 	private String actuatorPrefix;
 	private String vmArguments;
@@ -82,7 +82,7 @@ public class Microservice {
 				"id='" + id + '\'' +
 				", name='" + name + '\'' +
 				", pomLocation='" + pomLocation + '\'' +
-				", gitLocation='" + gitLocation + '\'' +
+				", gitLocation='" + gitLocation + '\'' +				
 				", defaultPort='" + defaultPort + '\'' +
 				", actuatorPrefix='" + actuatorPrefix + '\'' +
 				", vmArguments='" + vmArguments + '\'' +
