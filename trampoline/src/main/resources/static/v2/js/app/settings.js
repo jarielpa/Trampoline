@@ -139,8 +139,7 @@ function setNewMicroserviceFromMaven(){
 			$.ajax({
 			    url : "/settings/setnewmicroservice/maven",
 			    type: "POST",
-			    data : {gitLocation: $('#input-git-newmicroservice-gitLocation').val(),
-			            destinationFolder: $('#input-maven-newmicroservice-destination').val(),
+			    data : {destinationFolder: $('#input-maven-newmicroservice-destination').val(),
 			    	    name: $("#input-maven-newmicroservice-name").val(), 			    				    	    
 			    	    defaultPort: $("#input-maven-newmicroservice-defaultport").val(),
 			    	    actuatorPrefix: $("#input-maven-newmicroservice-actuatorprefix").val(),

@@ -78,13 +78,13 @@ public class SettingsController {
 	
 	@RequestMapping(value= "/setnewmicroservice/maven", method = RequestMethod.POST)
 	@ResponseBody
-	public void setNewMicroserviceFromMaven(@RequestParam(value="gitLocation") String gitLocation, @RequestParam(value="destinationFolder") String destinationFolder,
+	public void setNewMicroserviceFromMaven(@RequestParam(value="destinationFolder") String destinationFolder,
 			                       @RequestParam(value="name") String name, 
 								   @RequestParam(value="defaultPort") String defaultPort, @RequestParam(value="actuatorPrefix") String actuatorPrefix,
 								   @RequestParam(value="vmArguments") String vmArguments, @RequestParam(value="groupId") String groupId, @RequestParam(value="artifactId") String artifactId,@RequestParam(value="version") String version) throws CreatingSettingsFolderException, ReadingEcosystemException, CreatingMicroserviceScriptException, SavingEcosystemException {
 		
 		mavenManager.copyMavenDependency(groupId, artifactId, version, destinationFolder);
-		ecosystemManager.setNewMicroservice(name, new StringBuilder(destinationFolder).append("/").append(artifactId).append("-").append(version).append(".jar").toString(), defaultPort, actuatorPrefix, vmArguments, "jar", gitLocation, groupId, artifactId, version);
+		ecosystemManager.setNewMicroservice(name, new StringBuilder(destinationFolder).append("/").append(artifactId).append("-").append(version).append(".jar").toString(), defaultPort, actuatorPrefix, vmArguments, "jar", "NA", groupId, artifactId, version);
 	}
 
 	@RequestMapping(value= "/setnewmicroservice/git", method = RequestMethod.POST)

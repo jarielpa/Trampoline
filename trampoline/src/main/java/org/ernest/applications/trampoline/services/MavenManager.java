@@ -3,6 +3,7 @@ package org.ernest.applications.trampoline.services;
 import javax.annotation.PostConstruct;
 
 import org.apache.maven.cli.MavenCli;
+import org.ernest.applications.trampoline.exceptions.CreatingMavenMicroserviceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,9 @@ public class MavenManager {
 		String[] args = new String[] { "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:copy", "-Dartifact=" + dependency,
 				"-DoutputDirectory=.", "-Dmdep.useBaseVersion=true"};
 	    MavenCli cli = new MavenCli();
-	    cli.doMain(args, destinationFolder, System.out, System.err);
+	    int exitcode = cli.doMain(args, destinationFolder, System.out, System.err);
+	    if (exitcode > 0)
+	     throw new CreatingMavenMicroserviceException();
 		
 	}
 	
