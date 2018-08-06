@@ -436,6 +436,16 @@ $(document).ready(function(){
     $('#content-newmicroservice-maven-repo').hide();
 });
 
+function showGitSettings(component){
+    $('#content-git-https-settings').hide();
+    $('#content-git-ssh-settings').hide();
+    $('#content-'+component).show();
+
+    $("#tab-git-https-settings").removeClass("active");
+    $("#tab-git-ssh-settings").removeClass("active");
+    $("#tab-"+component).addClass("active");
+}
+
 function showNewMsForm(component){
      $('#content-file-system').hide();
      $('#content-newmicroservice-git-repo').hide();
